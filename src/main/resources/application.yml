@@ -1,0 +1,94 @@
+server:
+  port: 9123
+logging:
+  level:
+    org.springframework.web: INFO
+    de.datev.schulung.gsonline2: INFO
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+        exclude: env
+spring:
+  datasource:
+    url: jdbc:h2:./local-db/data;MODE=PostgreSQL
+    username: app
+    password: null
+    driverClassName: org.h2.Driver
+  h2:
+    console:
+      enabled: true
+  jpa:
+    generate-ddl: true # change to false
+    show-sql: false
+    hibernate:
+      ddl-auto: update # change to none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  #    properties.javax.persistence.schema-generation.create-source: metadata
+  #    properties.javax.persistence.schema-generation.scripts.action: create
+  #    properties.javax.persistence.schema-generation.scripts.create-target: local-db-storage/create.sql
+  jackson:
+    mapper:
+      CAN_OVERRIDE_ACCESS_MODIFIERS: true
+    deserialization:
+      FAIL_ON_UNKNOWN_PROPERTIES: false
+  cache:
+    caffeine:
+      spec: maximumSize=30,expireAfterWrite=10s
+    type: caffeine
+  mail:
+    host: smtp.1und1.de
+    username: inventory@maxya.de
+    password: billy5mareen
+    smtp:
+      auth: true
+      starttls:
+        enable: true
+
+  #------------------- Kafka Configuration  --------------
+kafka:
+  producer:
+    value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+---
+spring:
+  profiles: postgresql
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: password
+  jpa:
+    generate-ddl: false
+    show-sql: false
+    hibernate:
+      ddl-auto: none
+
+---
+spring:
+  profiles: test
+  datasource:
+    url: null
+    username: app
+    password: null
+    driverClassName: org.h2.Driver
+  jpa:
+    generate-ddl: true
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+logging:
+  level:
+    org.springframework.web: DEBUG
+    de.datev.schulung.gsonline2: DEBUG
+
+---
+spring:
+  profiles: cloud
+  jpa:
+    generate-ddl: false
+    show-sql: false
+    hibernate:
+      ddl-auto: none
