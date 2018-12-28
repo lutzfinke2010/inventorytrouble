@@ -138,7 +138,16 @@ public class RblParserSchedule {
         Optional<RBLGames> firstGame = checker.getGamesToSave().stream().findFirst();
         if (firstGame.isPresent()){
             try {
-               this.template.send("topic1", firstGame.get());
+               this.template.send("topic1", mapper.writeValueAsString(firstGame.get()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }else{
+            try {
+                RBLGames game = new RBLGames();
+                game.setName("NoGame");
+                String gameAsJsonString = mapper.writeValueAsString(game);
+                this.template.send("topic1", gameAsJsonString);
             } catch (Exception e) {
                 e.printStackTrace();
             }
