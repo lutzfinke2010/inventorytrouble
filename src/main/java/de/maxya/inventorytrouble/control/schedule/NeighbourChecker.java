@@ -2,17 +2,17 @@ package de.maxya.inventorytrouble.control.schedule;
 
 import de.maxya.inventorytrouble.boundary.model.RBLGames;
 import de.maxya.inventorytrouble.boundary.model.RBLSitzplatz;
+import de.maxya.inventorytrouble.control.rules.RBLRuleResult;
 
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 
 public class NeighbourChecker extends RBLRuleResult {
 
     public NeighbourChecker() {
     }
 
-    public RBLRuleResult check(RBLGames game, RBLGameSearchOption searchOption, RBLRule rule) {
+    public RBLRuleResult check(RBLGames game, RblGameSearchOption searchOption, RBLRule rule) {
         RBLRuleResult result = new RBLRuleResult();
         result.Check = false;
         result.link = game.getLink();
@@ -30,6 +30,7 @@ public class NeighbourChecker extends RBLRuleResult {
                         result.Check = true;
                         result.Info = "" + platz.toString() + " und " + lastPlace.toString();
                         result.sitzplatz = platz;
+                        result.Name = game.getName() + " Nachbarn";
                         return result;
                     }
                     lastPlace = platz;

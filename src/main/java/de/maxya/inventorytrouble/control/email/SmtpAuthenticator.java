@@ -12,7 +12,7 @@ public class SmtpAuthenticator extends Authenticator {
 		@Override
 		public PasswordAuthentication getPasswordAuthentication() {
 		 String username = "inventory@maxya.de";
-		 String password = "billy5mareen";
+		 String password = "sory5mareen";
 		    if ((username != null) && (username.length() > 0) && (password != null) 
 		      && (password.length   () > 0)) {
 

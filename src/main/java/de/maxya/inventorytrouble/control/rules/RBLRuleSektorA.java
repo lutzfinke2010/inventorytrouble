@@ -1,13 +1,14 @@
-package de.maxya.inventorytrouble.control.schedule;
+package de.maxya.inventorytrouble.control.rules;
 
 import de.maxya.inventorytrouble.boundary.model.RBLSitzplatz;
+import de.maxya.inventorytrouble.control.schedule.RBLRule;
 
-public class RBLRuleSektorC implements RBLRule {
+public class RBLRuleSektorA implements RBLRule {
     @Override
     public boolean check(RBLSitzplatz rblPlatz) {
         try {
             int bereich = Integer.parseInt(rblPlatz.getBereich());
-            if (bereich >= 32 && bereich <= 50) {
+            if (bereich >= 1 && bereich <= 24) {
                 return true;
             }
             return false;
@@ -18,14 +19,13 @@ public class RBLRuleSektorC implements RBLRule {
 
     @Override
     public int getId() {
-        return 2;
+        return 3;
     }
 
     @Override
     public String getName() {
-        return "Sektor C";
+        return "Sektor A";
     }
-
 
     boolean searchNeighbours = false;
 

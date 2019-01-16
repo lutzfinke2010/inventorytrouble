@@ -5,30 +5,38 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.maxya.inventorytrouble.boundary.InventoryTroubleApiImpl;
 import de.maxya.inventorytrouble.boundary.model.RBLGameSearchOptionToSend;
 import de.maxya.inventorytrouble.boundary.model.RBLGames;
+import de.maxya.inventorytrouble.boundary.model.RBLRuleResultResponse;
 import de.maxya.inventorytrouble.control.RBLGameService;
 import de.maxya.inventorytrouble.control.email.MailController;
 import de.maxya.inventorytrouble.control.mapper.RBLGameSearchOptionMapper;
 import de.maxya.inventorytrouble.control.rblparser.RBLPageParser;
+import de.maxya.inventorytrouble.control.rules.RBLRuleResult;
+import de.maxya.inventorytrouble.control.rules.RBLRuleSektorB;
+import de.maxya.inventorytrouble.control.rules.RBLRuleSektorD;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class RblParserSchedule {
 
     private static final Logger LOGGER = LogManager.getLogger(InventoryTroubleApiImpl.class);
-    private static final int FIXED_DELAY = 10000;
+    private static final int FIXED_DELAY = 9000;
     private static final int STATUS_EACH_HOURS = 2;
+    int MAX_WAIT_CYCLES = 5;
 
     private boolean stopped = false;
     private StringBuilder stringBuilder = new StringBuilder();
+    private WebSocketMessageSender webSocketSender;
 
     @Autowired
     RBLPageParser parser;
@@ -36,27 +44,44 @@ public class RblParserSchedule {
     @Autowired
     RBLGameService service;
 
+    @Autowired
+    SimpMessagingTemplate templateWebSocket;
+
+    @Autowired
+    private KafkaTemplate<Object, Object> template;
+
     private RblGameChecker checker;
     private List<String> listOfGameNames;
 
-    public RblParserSchedule(){
+    public RblParserSchedule() {
         checker = new RblGameChecker();
         RBLRuleSektorB b = new RBLRuleSektorB();
         RBLRuleSektorD d = new RBLRuleSektorD();
         RBLRuleSektorD dMitNachbarn = new RBLRuleSektorD();
         dMitNachbarn.searchNeighbours(true);
 
-        RBLGameSearchOption searchBremen = new RBLGameSearchOption("RB Leipzig-SV Werder Bremen");
-        searchBremen.addRule(b);
+        RblGameSearchOption searchIstanbul = new RblGameSearchOption("RB Leipzig-Galatasaray Istanbul");
 
-        checker.addSearchOption(searchBremen);
+        RblGameSearchOption searchFrankfurt = new RblGameSearchOption("RB Leipzig-Eintracht Frankfurt");
+        searchFrankfurt.addRule(b);
+        //searchFrankfurt.addRule(dMitNachbarn);
+
+
+        RblGameSearchOption searchDortmund = new RblGameSearchOption("RB Leipzig-Borussia Dortmund");
+        searchDortmund.addRule(b);
+        searchDortmund.addRule(d);
+        searchDortmund.addRule(dMitNachbarn);
+
+        checker.addSearchOption(searchIstanbul);
+        checker.addSearchOption(searchFrankfurt);
+        checker.addSearchOption(searchDortmund);
 
         checker.logSearchOptions();
 
         listOfGameNames = new ArrayList<>();
     }
 
-    public List<RBLGameSearchOption> getSearchOptions(){
+    public List<RblGameSearchOption> getSearchOptions() {
         return checker.getSearchOptions();
     }
 
@@ -65,48 +90,52 @@ public class RblParserSchedule {
     int waitSomeCycles = 1;
     int count = 1;
 
-    @Autowired
-    private KafkaTemplate<Object, Object> template;
 
     @Scheduled(initialDelay = 1000, fixedDelay = FIXED_DELAY)
     public void run() {
+        webSocketSender = new WebSocketMessageSender(templateWebSocket, template);
         checker.reset();
         listOfGameNames.clear();
         if (stopped) {
             LOGGER.info("RBL-Parser stopped");
             return;
         }
-        if (count < waitSomeCycles){
+        if (count < waitSomeCycles) {
             count++;
-            LOGGER.log(Level.INFO,"WaitCycle: " + count);
+            webSocketSender.reset().setWaitRoomCounter(count).send();
+            LOGGER.log(Level.INFO, "WaitCycle: " + count);
             return;
-        }else{
+        } else {
             count = 1;
         }
 
-        if(number % 20 == 0){
-            LOGGER.log(Level.INFO,"Count: " + service.count());
-            LOGGER.log(Level.INFO,"Count Sitzplatz: " + service.countSitzplatze());
+        if (number % 20 == 0) {
+            LOGGER.log(Level.INFO, "Count: " + service.count());
+            LOGGER.log(Level.INFO, "Count Sitzplatz: " + service.countSitzplatze());
             checker.logSearchOptions();
+            webSocketSender.reset().setSearchOptions(checker.getSearchOptionsForGames()).send();
             number = 1;
         }
         number++;
 
         List<RBLGames> erg = parser.extractFreePlaces();
-        if (parser.isInWarteRaum()){
-            LOGGER.log(Level.WARN,"Warteraum wait 50 Cycles");
-            waitSomeCycles = 50;
-        }else{
+        if (parser.isInWarteRaum()) {
+            LOGGER.log(Level.WARN, "Warteraum wait "+MAX_WAIT_CYCLES+" Cycles");
+            waitSomeCycles = MAX_WAIT_CYCLES;
+            return;
+        } else {
             waitSomeCycles = 1;
         }
 
         fillGameList(erg);
 
-        int countOfGamesWithBBlockTickets = 0;
+        if (erg != null && erg.size() > 0) {
+            webSocketSender.reset().setSearchOptions(checker.getSearchOptionsForGames())
+                    .setRBLGames(erg)
+                    .send();
+        }
 
         List<RBLRuleResult> findings = checker.checkRBLGameList(erg);
-
-
 
         for (Iterator<RBLGames> itPlaces = checker.getGamesToSave().iterator(); itPlaces.hasNext(); ) {
             RBLGames game = itPlaces.next();
@@ -134,37 +163,21 @@ public class RblParserSchedule {
             text += stringBuilder.toString();
         }
 
-        ObjectMapper mapper = new ObjectMapper();
-        Optional<RBLGames> firstGame = checker.getGamesToSave().stream().findFirst();
-        if (firstGame.isPresent()){
-            try {
-               this.template.send("topic1", mapper.writeValueAsString(firstGame.get()));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }else{
-            try {
-                RBLGames game = new RBLGames();
-                game.setName("NoGame");
-                String gameAsJsonString = mapper.writeValueAsString(game);
-                this.template.send("topic1", gameAsJsonString);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
         StringBuilder spieleBuilder = new StringBuilder();
         StringBuilder begegnungen = new StringBuilder();
 
         if (findings.size() > 0) {
-            findings.stream().forEach(result ->{
+            findings.stream().forEach(result -> {
                 begegnungen.append("" + result.Name + " ");
                 spieleBuilder.append("" + result.Name + " ");
                 spieleBuilder.append(result.Info + " ");
                 spieleBuilder.append(result.sitzplatz.toString() + " ");
                 spieleBuilder.append(result.link + " \n\n");
             });
-            mc.sendOhneAnhang("lutzfinke2010@gmail.com", "!! "+findings.size()+" Findings " + begegnungen.toString()+ " !!", spieleBuilder.toString());
+
+            webSocketSender.reset().setFindings(findings).distinct().send();
+
+            mc.sendOhneAnhang("lutzfinke2010@gmail.com", "!! " + findings.size() + " Findings " + begegnungen.toString() + " !!", spieleBuilder.toString());
         } else {
             if (counterHour == haveIWait2Hours()) {
                 mc.sendOhneAnhang("lutzfinke2010@gmail.com", "!!! STATUS !!!", text);
@@ -175,24 +188,29 @@ public class RblParserSchedule {
         }
     }
 
+    public static <T> Predicate<T> distinctByKey(Function<? super T, Object> keyExtractor) {
+        Map<Object, Boolean> map = new ConcurrentHashMap<>();
+        return t -> map.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
+    }
+
     private void fillGameList(List<RBLGames> erg) {
         for (Iterator<RBLGames> itPlaces = erg.iterator(); itPlaces.hasNext(); ) {
             RBLGames game = itPlaces.next();
             String name = game.getName();
-            if (!listOfGameNames.contains(name)){
+            if (!listOfGameNames.contains(name)) {
                 listOfGameNames.add(name);
             }
         }
     }
 
-    public List<String> getListOfGameNames(){
+    public List<String> getListOfGameNames() {
         return listOfGameNames;
     }
 
     private int haveIWait2Hours() {
         int millisecondsPerHours = 1000 * 60 * 60;
         int millisecondsToWait = millisecondsPerHours * STATUS_EACH_HOURS;
-        return Math.round((float)millisecondsToWait / (float)FIXED_DELAY) ;
+        return Math.round((float) millisecondsToWait / (float) FIXED_DELAY);
     }
 
     private int counterHour = 0;

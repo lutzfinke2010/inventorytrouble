@@ -6,6 +6,10 @@ import de.maxya.inventorytrouble.boundary.rest.InventoryTroubleApi;
 import de.maxya.inventorytrouble.control.ArtikelService;
 import de.maxya.inventorytrouble.control.RBLGameService;
 import de.maxya.inventorytrouble.control.rblparser.RBLPageParser;
+import de.maxya.inventorytrouble.control.rules.RBLRuleSektorA;
+import de.maxya.inventorytrouble.control.rules.RBLRuleSektorB;
+import de.maxya.inventorytrouble.control.rules.RBLRuleSektorC;
+import de.maxya.inventorytrouble.control.rules.RBLRuleSektorD;
 import de.maxya.inventorytrouble.control.schedule.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -81,14 +85,14 @@ public class InventoryTroubleApiImpl implements InventoryTroubleApi {
     public String stopParser() {
         LOGGER.info("Parser STOPPED");
         schedule.stop();
-        return "stopped";
+        return "{\"status\": \"stopped\"}";
     }
 
     @Override
     public String startParser() {
         LOGGER.info("Parser STARTED");
         schedule.start();
-        return "started";
+        return "{\"status\": \"started\"}";
     }
 
     @Override
@@ -102,7 +106,7 @@ public class InventoryTroubleApiImpl implements InventoryTroubleApi {
     }
 
     @Override
-    public List<RBLGameSearchOption> getSearchOptions() {
+    public List<RblGameSearchOption> getSearchOptions() {
         schedule.logSearchOptions();
         return schedule.getSearchOptions();
     }

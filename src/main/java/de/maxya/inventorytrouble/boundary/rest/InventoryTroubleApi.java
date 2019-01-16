@@ -1,7 +1,7 @@
 package de.maxya.inventorytrouble.boundary.rest;
 
 import de.maxya.inventorytrouble.boundary.model.*;
-import de.maxya.inventorytrouble.control.schedule.RBLGameSearchOption;
+import de.maxya.inventorytrouble.control.schedule.RblGameSearchOption;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,7 +40,7 @@ public interface InventoryTroubleApi {
     List<RBLSitzplatzAnzahlVerlauf> getRBLGamesVerlauf();
 
     @RequestMapping(value="/tenants/{tenantId}/searchoptions", method = RequestMethod.GET)
-    List<RBLGameSearchOption> getSearchOptions();
+    List<RblGameSearchOption> getSearchOptions();
 
     @RequestMapping(value="/tenants/{tenantId}/searchoptionschange", method = RequestMethod.PUT, consumes={"application/json; charset=utf-8"})
     void setSearchOptions(@RequestBody RBLGameSearchOptionToSend searchOption);

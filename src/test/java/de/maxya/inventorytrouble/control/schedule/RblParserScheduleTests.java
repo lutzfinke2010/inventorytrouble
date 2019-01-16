@@ -1,15 +1,9 @@
 package de.maxya.inventorytrouble.control.schedule;
 
-import de.maxya.inventorytrouble.InventorytroubleApplicationConfig;
 import de.maxya.inventorytrouble.boundary.model.RBLGames;
 import de.maxya.inventorytrouble.boundary.model.RBLSitzplatz;
+import de.maxya.inventorytrouble.control.rules.RBLRuleSektorB;
 import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -113,9 +107,9 @@ public class RblParserScheduleTests {
         String link2 = "toller Link 2";
 
         RblGameChecker subject = new RblGameChecker();
-        RBLGameSearchOption optionB = new RBLGameSearchOption("RB Leipzig - Barca");
+        RblGameSearchOption optionB = new RblGameSearchOption("RB Leipzig - Barca");
         optionB.addRule(new RBLRuleSektorB());
-        RBLGameSearchOption optionD = new RBLGameSearchOption("RB Leipzig - Deutschland");
+        RblGameSearchOption optionD = new RblGameSearchOption("RB Leipzig - Deutschland");
         optionD.addRule(new RBLRuleSektorB());
         subject.reset();
         subject.addSearchOption(optionB);
@@ -290,7 +284,7 @@ public class RblParserScheduleTests {
         String link = "toller Link";
 
         RblGameChecker subject = new RblGameChecker();
-        subject.addSearchOption(new RBLGameSearchOption(gameName));
+        subject.addSearchOption(new RblGameSearchOption(gameName));
         subject.reset();
         RBLGames gameWithoutB = new RBLGames();
         gameWithoutB.setName(gameName);
@@ -324,9 +318,9 @@ public class RblParserScheduleTests {
         String gameName2 = "RB Leipzig - Deutschland";
         String link2 = "toller Link 2";
         RblGameChecker subject = new RblGameChecker();
-        RBLGameSearchOption optionB = new RBLGameSearchOption("RB Leipzig - Barca");
+        RblGameSearchOption optionB = new RblGameSearchOption("RB Leipzig - Barca");
         optionB.addRule(new RBLRuleSektorB());
-        RBLGameSearchOption optionD = new RBLGameSearchOption("RB Leipzig - Deutschland");
+        RblGameSearchOption optionD = new RblGameSearchOption("RB Leipzig - Deutschland");
         optionD.addRule(new RBLRuleSektorB());
         subject.reset();
         subject.addSearchOption(optionB);
@@ -399,9 +393,9 @@ public class RblParserScheduleTests {
         String link = "toller Link";
 
         RblGameChecker subject = new RblGameChecker();
-        RBLGameSearchOption optionB = new RBLGameSearchOption("RB Leipzig - Barca");
+        RblGameSearchOption optionB = new RblGameSearchOption("RB Leipzig - Barca");
         optionB.addRule(new RBLRuleSektorB());
-        RBLGameSearchOption optionD = new RBLGameSearchOption("RB Leipzig - Deutschland");
+        RblGameSearchOption optionD = new RblGameSearchOption("RB Leipzig - Deutschland");
         optionD.addRule(new RBLRuleSektorB());
         subject.reset();
         subject.addSearchOption(optionB);
@@ -439,7 +433,7 @@ public class RblParserScheduleTests {
         String link = "toller Link";
 
         RblGameChecker subject = new RblGameChecker();
-        subject.addSearchOption(new RBLGameSearchOption(gameName));
+        subject.addSearchOption(new RblGameSearchOption(gameName));
         subject.reset();
         RBLGames gameWithoutB = new RBLGames();
         gameWithoutB.setName(gameName);

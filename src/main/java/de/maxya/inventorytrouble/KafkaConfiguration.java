@@ -36,8 +36,8 @@ public class KafkaConfiguration {
 
     @KafkaListener(id = "iventorygroup1", topics = "topic1")
     public void listen(RBLGames foo) {
-        LOGGER.info("Apfel: " + foo);
-        LOGGER.info("Received: " + foo);
+//        LOGGER.info("Apfel: " + foo);
+//        LOGGER.info("Received: " + foo);
     }
 
 }

@@ -77,6 +77,6 @@ public class RBLSitzplatzTests {
         int actual = platz.getSortNumber();
 
         //assert
-        Assert.assertEquals(-1,actual);
+        Assert.assertTrue(actual < 0);
     }
 }

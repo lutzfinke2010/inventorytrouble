@@ -2,6 +2,7 @@ package de.maxya.inventorytrouble.control.schedule;
 
 import de.maxya.inventorytrouble.boundary.model.RBLGames;
 import de.maxya.inventorytrouble.boundary.model.RBLSitzplatz;
+import de.maxya.inventorytrouble.control.rules.RBLRuleResult;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -13,7 +14,7 @@ public class RBLRulesManager {
 
     }
 
-    public List<RBLRuleResult> check(RBLGames game, RBLGameSearchOption searchOption) {
+    public List<RBLRuleResult> check(RBLGames game, RblGameSearchOption searchOption) {
         List<RBLRuleResult> resultList = new ArrayList<>();
         for (Iterator<RBLRule> itRules = searchOption.getRules().iterator(); itRules.hasNext(); ) {
             RBLRule rule = itRules.next();
@@ -26,6 +27,7 @@ public class RBLRulesManager {
                             result.Check = true;
                             result.Info = rule.getName();
                             result.link = game.getLink();
+                            result.Name = game.getName();
                             result.sitzplatz = platz;
                             resultList.add(result);
                         }
@@ -38,7 +40,7 @@ public class RBLRulesManager {
         return resultList;
     }
 
-    public RBLRuleResult checkNeighbours(RBLGames game, RBLGameSearchOption searchOption) {
+    public RBLRuleResult checkNeighbours(RBLGames game, RblGameSearchOption searchOption) {
         RBLRuleResult result = new RBLRuleResult();
 
         for (Iterator<RBLRule> itRules = searchOption.getRules().iterator(); itRules.hasNext(); ) {

@@ -2,6 +2,7 @@ package de.maxya.inventorytrouble.control.schedule;
 
 import de.maxya.inventorytrouble.boundary.InventoryTroubleApiImpl;
 import de.maxya.inventorytrouble.boundary.model.RBLGames;
+import de.maxya.inventorytrouble.control.rules.RBLRuleResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,11 +26,15 @@ public class RblGameChecker {
         LOGGER.info("-----------------------------");
         LOGGER.info("-----SEARCH-OPTIONS----------");
         LOGGER.info("-----------------------------");
-        for (Iterator<RBLGameSearchOption> it = this.searchOptionsForGames.iterator(); it.hasNext(); ) {
-            RBLGameSearchOption gameToSearch = it.next();
+        for (Iterator<RblGameSearchOption> it = this.searchOptionsForGames.iterator(); it.hasNext(); ) {
+            RblGameSearchOption gameToSearch = it.next();
             gameToSearch.log();
         }
         LOGGER.info("-----------------------------");
+    }
+
+    public List<RblGameSearchOption> getSearchOptionsForGames(){
+        return this.searchOptionsForGames;
     }
 
     public int getCountOfGamesWithBBlockTickets() {
@@ -61,7 +66,7 @@ public class RblGameChecker {
         return gamesToSave;
     }
 
-    private List<RBLGameSearchOption> searchOptionsForGames;
+    private List<RblGameSearchOption> searchOptionsForGames;
 
     public List<RBLRuleResult> checkRBLGameList(List<RBLGames> erg) {
         this.reset();
@@ -69,7 +74,7 @@ public class RblGameChecker {
         for (Iterator<RBLGames> it = erg.iterator(); it.hasNext(); ) {
             RBLGames game = it.next();
             gamesToSave.add(game);
-            RBLGameSearchOption searchOption = getSearchOptions(game);
+            RblGameSearchOption searchOption = getSearchOptions(game);
             if (searchOption != null) {
                 try {
                     List<RBLRuleResult> resultList = rulesManager.check(game, searchOption);
@@ -92,9 +97,9 @@ public class RblGameChecker {
         return findings;
     }
 
-    private RBLGameSearchOption getSearchOptions(RBLGames game) {
-        for (Iterator<RBLGameSearchOption> it = this.searchOptionsForGames.iterator(); it.hasNext(); ) {
-            RBLGameSearchOption gameToSearch = it.next();
+    private RblGameSearchOption getSearchOptions(RBLGames game) {
+        for (Iterator<RblGameSearchOption> it = this.searchOptionsForGames.iterator(); it.hasNext(); ) {
+            RblGameSearchOption gameToSearch = it.next();
             if (gameToSearch.name.equals(game.getName())) {
                 return gameToSearch;
             }
@@ -107,18 +112,18 @@ public class RblGameChecker {
         this.gamesToSave = new ArrayList<>();
     }
 
-    public void addSearchOption(RBLGameSearchOption gameName) {
+    public void addSearchOption(RblGameSearchOption gameName) {
         this.searchOptionsForGames.add(gameName);
     }
 
-    public List<RBLGameSearchOption> getSearchOptions() {
+    public List<RblGameSearchOption> getSearchOptions() {
         return this.searchOptionsForGames;
     }
 
-    public void changeSearchOptions(RBLGameSearchOption searchOption) {
+    public void changeSearchOptions(RblGameSearchOption searchOption) {
         boolean found = false;
-        for (Iterator<RBLGameSearchOption> it = this.searchOptionsForGames.iterator(); it.hasNext(); ) {
-            RBLGameSearchOption gameToSearch = it.next();
+        for (Iterator<RblGameSearchOption> it = this.searchOptionsForGames.iterator(); it.hasNext(); ) {
+            RblGameSearchOption gameToSearch = it.next();
             if (gameToSearch.name.equals(searchOption.name)) {
                 found = true;
                 gameToSearch.setRules(searchOption.getRules());

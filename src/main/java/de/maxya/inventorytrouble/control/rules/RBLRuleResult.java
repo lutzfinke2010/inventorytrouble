@@ -1,4 +1,4 @@
-package de.maxya.inventorytrouble.control.schedule;
+package de.maxya.inventorytrouble.control.rules;
 
 import de.maxya.inventorytrouble.boundary.model.RBLSitzplatz;
 

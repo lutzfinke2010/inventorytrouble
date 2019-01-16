@@ -42,7 +42,7 @@ spring:
   mail:
     host: smtp.1und1.de
     username: inventory@maxya.de
-    password: billy5mareen
+    password: sora5mareen
     smtp:
       auth: true
       starttls:

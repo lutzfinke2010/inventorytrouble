@@ -6,6 +6,7 @@ import de.maxya.inventorytrouble.boundary.model.RBLSitzplatz;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
@@ -18,6 +19,10 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 @Service
 public class RBLPageParser {
@@ -28,6 +33,7 @@ public class RBLPageParser {
     public boolean isInWarteRaum(){
         return warteRaumm;
     }
+
 
     public List<RBLGames> extractFreePlaces(){
         List<RBLGames> gameNeu = new ArrayList<>();
@@ -91,6 +97,7 @@ public class RBLPageParser {
             RBLGames game = (RBLGames) it.next();
             try {
                 Document doc = getDocumentFromLink(game.getLink());
+
                 Elements links = doc.select("a[class='btn btn-primary btn-block']");
                 for (Iterator itE = links.iterator(); itE.hasNext(); ) {
                     Element element = (Element) itE.next();
@@ -143,7 +150,7 @@ public class RBLPageParser {
             }
             return games;
         } catch (IOException ex) {
-            //...
+            LOGGER.log(Level.ERROR,ex);
         }
         return new ArrayList<RBLGames>();
     }

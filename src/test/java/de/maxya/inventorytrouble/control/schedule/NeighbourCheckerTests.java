@@ -2,11 +2,12 @@ package de.maxya.inventorytrouble.control.schedule;
 
 import de.maxya.inventorytrouble.boundary.model.RBLGames;
 import de.maxya.inventorytrouble.boundary.model.RBLSitzplatz;
+import de.maxya.inventorytrouble.control.rules.RBLRuleResult;
+import de.maxya.inventorytrouble.control.rules.RBLRuleSektorD;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import javax.naming.directory.SearchControls;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class NeighbourCheckerTests {
     public void placesAreEmptyExpectFalse() {
         NeighbourChecker subject = new NeighbourChecker();
         RBLGames game = new RBLGames();
-        RBLGameSearchOption option = new RBLGameSearchOption("game");
+        RblGameSearchOption option = new RblGameSearchOption("game");
 
         RBLRuleResult actual = subject.check(game, option, new RBLRuleSektorD());
 
@@ -38,7 +39,7 @@ public class NeighbourCheckerTests {
 
         game.setPlaetze(plaetze);
 
-        RBLGameSearchOption option = new RBLGameSearchOption("game");
+        RblGameSearchOption option = new RblGameSearchOption("game");
 
         RBLRuleResult actual = subject.check(game, option, new RBLRuleSektorD());
 
@@ -65,7 +66,7 @@ public class NeighbourCheckerTests {
 
         game.setPlaetze(plaetze);
 
-        RBLGameSearchOption option = new RBLGameSearchOption("game");
+        RblGameSearchOption option = new RblGameSearchOption("game");
 
         RBLRuleResult actual = subject.check(game, option, new RBLRuleSektorD());
 
@@ -96,7 +97,7 @@ public class NeighbourCheckerTests {
 
         game.setPlaetze(plaetze);
 
-        RBLGameSearchOption option = new RBLGameSearchOption("game");
+        RblGameSearchOption option = new RblGameSearchOption("game");
 
         RBLRuleResult actual = subject.check(game, option, new RBLRuleSektorD());
 
@@ -121,7 +122,7 @@ public class NeighbourCheckerTests {
 
         game.setPlaetze(plaetze);
 
-        RBLGameSearchOption option = new RBLGameSearchOption("game");
+        RblGameSearchOption option = new RblGameSearchOption("game");
 
         RBLRuleResult actual = subject.check(game, option, new RBLRuleSektorD());
 
@@ -160,7 +161,7 @@ public class NeighbourCheckerTests {
 
         game.setPlaetze(plaetze);
 
-        RBLGameSearchOption option = new RBLGameSearchOption("game");
+        RblGameSearchOption option = new RblGameSearchOption("game");
 
         RBLRuleResult actual = subject.check(game, option, new RBLRuleSektorD());
 

@@ -62,7 +62,11 @@ public class RBLSitzplatz {
     }
 
     public int getBereichAsInt() {
-        return Integer.parseInt(getBereich());
+        try{
+            return Integer.parseInt(getBereich());
+        }catch(Exception ex){
+            return -1;
+        }
     }
 
     public int getSitzAsInt() {

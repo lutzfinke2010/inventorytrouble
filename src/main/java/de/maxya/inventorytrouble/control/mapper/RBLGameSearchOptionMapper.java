@@ -2,18 +2,18 @@ package de.maxya.inventorytrouble.control.mapper;
 
 import de.maxya.inventorytrouble.boundary.model.RBLGameSearchOptionToSend;
 import de.maxya.inventorytrouble.boundary.model.RBLRuleToSend;
-import de.maxya.inventorytrouble.control.schedule.RBLGameSearchOption;
-import de.maxya.inventorytrouble.control.schedule.RBLRuleSektorB;
-import de.maxya.inventorytrouble.control.schedule.RBLRuleSektorD;
+import de.maxya.inventorytrouble.control.schedule.RblGameSearchOption;
+import de.maxya.inventorytrouble.control.rules.RBLRuleSektorB;
+import de.maxya.inventorytrouble.control.rules.RBLRuleSektorD;
 
 import java.util.Iterator;
 
 public class RBLGameSearchOptionMapper {
-    public static RBLGameSearchOption mapToRBLGameSearchOption(RBLGameSearchOptionToSend gameSearchOption) {
+    public static RblGameSearchOption mapToRBLGameSearchOption(RBLGameSearchOptionToSend gameSearchOption) {
         if (null == gameSearchOption) {
             return null;
         }
-        RBLGameSearchOption gameEnt = new RBLGameSearchOption(gameSearchOption.getName());
+        RblGameSearchOption gameEnt = new RblGameSearchOption(gameSearchOption.getName());
         gameEnt.name = (gameSearchOption.getName());
         for (Iterator<RBLRuleToSend> it = gameSearchOption.getRules().iterator(); it.hasNext(); ) {
             RBLRuleToSend rule = it.next();

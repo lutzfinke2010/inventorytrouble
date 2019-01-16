@@ -1,20 +1,19 @@
 package de.maxya.inventorytrouble.boundary.websocket;
 
-import de.maxya.inventorytrouble.boundary.model.User;
-import de.maxya.inventorytrouble.boundary.model.UserResponse;
+import de.maxya.inventorytrouble.boundary.model.RBLRuleResultResponse;
+import de.maxya.inventorytrouble.control.rules.RBLRuleResult;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
 @Controller
-public class UserController {
+public class RblGamesController {
 
 
     @MessageMapping("/user")
     @SendTo("/topic/user")
-    public UserResponse getUser(User user) {
-
-        return new UserResponse("Hi " + user.getName());
+    public RBLRuleResultResponse getRBLGames(RBLRuleResult games) {
+        return new RBLRuleResultResponse(games);
     }
 }
 

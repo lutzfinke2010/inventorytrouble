@@ -9,12 +9,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class RBLGameSearchOption {
+public class RblGameSearchOption {
 
     private List<RBLRule> rules;
     private static final Logger LOGGER = LogManager.getLogger(InventoryTroubleApiImpl.class);
 
-    public RBLGameSearchOption(String name) {
+    public RblGameSearchOption(String name) {
         this.name = name;
         this.rules = new ArrayList<>();
     }
