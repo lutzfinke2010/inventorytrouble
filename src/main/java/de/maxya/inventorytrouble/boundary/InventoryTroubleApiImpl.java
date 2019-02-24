@@ -62,10 +62,13 @@ public class InventoryTroubleApiImpl implements InventoryTroubleApi {
     @Autowired
     RBLGameService service;
 
+    @Autowired
+    RblParserSchedule schedule;
+
     @Override
     public List<RBLGames> getRBLGames()
     {
-        return service.getRBLGames("Scheduler");
+        return schedule.getAvaiableGames();
     }
 
     @Override
@@ -77,9 +80,6 @@ public class InventoryTroubleApiImpl implements InventoryTroubleApi {
     public List<RBLSitzplatz> getRBLSitzplaetze() {
         return service.getSitzplaetze("Scheduler");
     }
-
-    @Autowired
-    RblParserSchedule schedule;
 
     @Override
     public String stopParser() {

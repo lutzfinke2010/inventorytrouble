@@ -30,6 +30,16 @@ public class RBLPageParser {
     private String basePath = "https://tickets.dierotenbullen.com/online/index.php";
     private boolean warteRaumm = false;
 
+    public List<RBLGames> getAvaiableGames() {
+        return avaiableGames;
+    }
+
+    private List<RBLGames> avaiableGames;
+
+    public RBLPageParser(){
+        avaiableGames = new ArrayList<>();
+    }
+
     public boolean isInWarteRaum(){
         return warteRaumm;
     }
@@ -91,9 +101,9 @@ public class RBLPageParser {
     }
 
     public List<RBLGames> extractTicketboerse() {
-        List<RBLGames> games = extractAvaiableGames();
+        avaiableGames = extractAvaiableGames();
         List<RBLGames> ret = new ArrayList<RBLGames>();
-        for (Iterator it = games.iterator(); it.hasNext(); ) {
+        for (Iterator it = avaiableGames.iterator(); it.hasNext(); ) {
             RBLGames game = (RBLGames) it.next();
             try {
                 Document doc = getDocumentFromLink(game.getLink());

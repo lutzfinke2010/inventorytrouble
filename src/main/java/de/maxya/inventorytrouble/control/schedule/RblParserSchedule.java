@@ -32,7 +32,7 @@ public class RblParserSchedule {
     private static final Logger LOGGER = LogManager.getLogger(InventoryTroubleApiImpl.class);
     private static final int FIXED_DELAY = 9000;
     private static final int STATUS_EACH_HOURS = 2;
-    int MAX_WAIT_CYCLES = 5;
+    int MAX_WAIT_CYCLES = 20;
 
     private boolean stopped = false;
     private StringBuilder stringBuilder = new StringBuilder();
@@ -60,21 +60,10 @@ public class RblParserSchedule {
         RBLRuleSektorD dMitNachbarn = new RBLRuleSektorD();
         dMitNachbarn.searchNeighbours(true);
 
-        RblGameSearchOption searchIstanbul = new RblGameSearchOption("RB Leipzig-Galatasaray Istanbul");
+        RblGameSearchOption searchHertha = new RblGameSearchOption("RB Leipzig-Hertha BSC");
+        searchHertha.addRule(b);
 
-        RblGameSearchOption searchFrankfurt = new RblGameSearchOption("RB Leipzig-Eintracht Frankfurt");
-        searchFrankfurt.addRule(b);
-        //searchFrankfurt.addRule(dMitNachbarn);
-
-
-        RblGameSearchOption searchDortmund = new RblGameSearchOption("RB Leipzig-Borussia Dortmund");
-        searchDortmund.addRule(b);
-        searchDortmund.addRule(d);
-        searchDortmund.addRule(dMitNachbarn);
-
-        checker.addSearchOption(searchIstanbul);
-        checker.addSearchOption(searchFrankfurt);
-        checker.addSearchOption(searchDortmund);
+        checker.addSearchOption(searchHertha);
 
         checker.logSearchOptions();
 
@@ -233,5 +222,9 @@ public class RblParserSchedule {
 
     public void changeSearchOptions(RBLGameSearchOptionToSend searchOption) {
         checker.changeSearchOptions(RBLGameSearchOptionMapper.mapToRBLGameSearchOption(searchOption));
+    }
+
+    public List<RBLGames> getAvaiableGames() {
+        return parser.getAvaiableGames();
     }
 }

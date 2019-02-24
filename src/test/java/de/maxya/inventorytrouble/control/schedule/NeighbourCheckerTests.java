@@ -137,7 +137,7 @@ public class NeighbourCheckerTests {
         List<RBLSitzplatz> plaetze = new ArrayList<RBLSitzplatz>();
 
         plaetze.add(RBLSitzplatz.createPlace("D", 55,4,3));
-        plaetze.add(RBLSitzplatz.createPlace("D", 56,5,3));
+        plaetze.add(RBLSitzplatz.createPlace("D", 55,4,4));
         plaetze.add(RBLSitzplatz.createPlace("D", 55,5,3));
         plaetze.add(RBLSitzplatz.createPlace("B", 11,5,3));
         plaetze.add(RBLSitzplatz.createPlace("D", 3,5,3));
@@ -168,5 +168,33 @@ public class NeighbourCheckerTests {
         System.out.println("Result:" + actual.Info);
 
         Assert.assertEquals(true,actual.Check);
+    }
+
+
+
+    @Test
+    public void placesContains2NeightbourPlacesInDifferentRowsExpectFalse() {
+        NeighbourChecker subject = new NeighbourChecker();
+        RBLGames game = new RBLGames();
+        List<RBLSitzplatz> plaetze = new ArrayList<RBLSitzplatz>();
+        RBLSitzplatz platz1 = new RBLSitzplatz();
+        platz1.setBereich("58");
+        platz1.setReihe("4");
+        platz1.setSitz("3");
+        RBLSitzplatz platz2 = new RBLSitzplatz();
+        platz2.setBereich("58");
+        platz2.setReihe("5");
+        platz2.setSitz("4");
+
+        plaetze.add(platz1);
+        plaetze.add(platz2);
+
+        game.setPlaetze(plaetze);
+
+        RblGameSearchOption option = new RblGameSearchOption("game");
+
+        RBLRuleResult actual = subject.check(game, option, new RBLRuleSektorD());
+
+        Assert.assertEquals(false,actual.Check);
     }
 }

@@ -54,4 +54,5 @@ public interface InventoryTroubleApi {
     @RequestMapping(value="/tenants/{tenantId}/webservicetest", method = RequestMethod.GET)
     String webServiceTest(@PathVariable String tenantId);
 
+
 }

@@ -26,7 +26,12 @@ public class NeighbourChecker extends RBLRuleResult {
                 if (lastPlace == null) {
                     lastPlace = platz;
                 } else {
-                    if (lastPlace.getSitzAsInt() == platz.getSitzAsInt() - 1) {
+                    String lastReihe = lastPlace.getReihe();
+                    String reihe = platz.getReihe();
+                    int lastplatz = lastPlace.getSitzAsInt();
+                    int platz1 = platz.getSitzAsInt();
+                    if (lastPlace.getReihe().equals(platz.getReihe()) &&
+                            lastPlace.getSitzAsInt() == platz.getSitzAsInt() - 1) {
                         result.Check = true;
                         result.Info = "" + platz.toString() + " und " + lastPlace.toString();
                         result.sitzplatz = platz;
