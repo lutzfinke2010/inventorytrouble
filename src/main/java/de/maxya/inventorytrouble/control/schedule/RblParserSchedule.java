@@ -4,15 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.maxya.inventorytrouble.boundary.InventoryTroubleApiImpl;
 import de.maxya.inventorytrouble.boundary.model.RBLGameSearchOptionToSend;
+import de.maxya.inventorytrouble.boundary.model.RBLGameToSearch;
 import de.maxya.inventorytrouble.boundary.model.RBLGames;
 import de.maxya.inventorytrouble.boundary.model.RBLRuleResultResponse;
 import de.maxya.inventorytrouble.control.RBLGameService;
 import de.maxya.inventorytrouble.control.email.MailController;
 import de.maxya.inventorytrouble.control.mapper.RBLGameSearchOptionMapper;
 import de.maxya.inventorytrouble.control.rblparser.RBLPageParser;
-import de.maxya.inventorytrouble.control.rules.RBLRuleResult;
-import de.maxya.inventorytrouble.control.rules.RBLRuleSektorB;
-import de.maxya.inventorytrouble.control.rules.RBLRuleSektorD;
+import de.maxya.inventorytrouble.control.rules.*;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -55,17 +54,17 @@ public class RblParserSchedule {
 
     public RblParserSchedule() {
         checker = new RblGameChecker();
-        RBLRuleSektorB b = new RBLRuleSektorB();
-        RBLRuleSektorD d = new RBLRuleSektorD();
-        RBLRuleSektorD dMitNachbarn = new RBLRuleSektorD();
-        dMitNachbarn.searchNeighbours(true);
-
-        RblGameSearchOption searchHertha = new RblGameSearchOption("RB Leipzig-Hertha BSC");
-        searchHertha.addRule(b);
-
-        checker.addSearchOption(searchHertha);
-
-        checker.logSearchOptions();
+//        RBLRuleSektorB b = new RBLRuleSektorB();
+//        RBLRuleSektorD d = new RBLRuleSektorD();
+//        RBLRuleSektorD dMitNachbarn = new RBLRuleSektorD();
+//        dMitNachbarn.searchNeighbours(true);
+//
+//        RblGameSearchOption searchHertha = new RblGameSearchOption("RB Leipzig-Hertha BSC");
+//        searchHertha.addRule(b);
+//
+//        checker.addSearchOption(searchHertha);
+//
+//        checker.logSearchOptions();
 
         listOfGameNames = new ArrayList<>();
     }
@@ -98,14 +97,6 @@ public class RblParserSchedule {
             count = 1;
         }
 
-        if (number % 20 == 0) {
-            LOGGER.log(Level.INFO, "Count: " + service.count());
-            LOGGER.log(Level.INFO, "Count Sitzplatz: " + service.countSitzplatze());
-            checker.logSearchOptions();
-            webSocketSender.reset().setSearchOptions(checker.getSearchOptionsForGames()).send();
-            number = 1;
-        }
-        number++;
 
         List<RBLGames> erg = parser.extractFreePlaces();
         if (parser.isInWarteRaum()) {
@@ -117,6 +108,17 @@ public class RblParserSchedule {
         }
 
         fillGameList(erg);
+
+        if (number % 20 == 0) {
+            LOGGER.log(Level.INFO, "Count: " + service.count());
+            LOGGER.log(Level.INFO, "Count Sitzplatz: " + service.countSitzplatze());
+            checker.logSearchOptions();
+            webSocketSender.reset().setSearchOptions(checker.getSearchOptionsForGames()).send();
+            checkAvaiableGames(erg);
+            number = 1;
+        }
+        number++;
+
 
         if (erg != null && erg.size() > 0) {
             webSocketSender.reset().setSearchOptions(checker.getSearchOptionsForGames())
@@ -177,6 +179,21 @@ public class RblParserSchedule {
         }
     }
 
+    private void checkAvaiableGames(List<RBLGames> erg) {
+        List<String> gamesAvaiable = new ArrayList<>();
+        List<RblGameSearchOption> options = checker.getSearchOptionsForGames();
+        erg.stream().forEach(rblGames->{
+           options.stream().forEach(option->{
+               if (option.name.equals(rblGames.getName())){
+                   gamesAvaiable.add(option.name);
+               }
+           });
+        });
+        gamesAvaiable.stream().forEach(avaibleGame->{
+            LOGGER.info("Game vorhanden: " + avaibleGame);
+        });
+    }
+
     public static <T> Predicate<T> distinctByKey(Function<? super T, Object> keyExtractor) {
         Map<Object, Boolean> map = new ConcurrentHashMap<>();
         return t -> map.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
@@ -227,4 +244,69 @@ public class RblParserSchedule {
     public List<RBLGames> getAvaiableGames() {
         return parser.getAvaiableGames();
     }
+
+    public void addOrRemoveGameToSearch(RBLGameToSearch gameToSearch) {
+        RBLRuleSektorA sektorA = new RBLRuleSektorA();
+        RBLRuleSektorB sektorB = new RBLRuleSektorB();
+        RBLRuleSektorC sektorC = new RBLRuleSektorC();
+        RBLRuleSektorD sektorD = new RBLRuleSektorD();
+
+        if (false == gameToSearch.isAktiv()){
+            Optional<RblGameSearchOption> searchOption =
+                    checker.getSearchOptions().stream().filter( option -> option.name == gameToSearch.getName()
+            ).findFirst();
+            if (searchOption.isPresent()){
+                RblGameSearchOption option = searchOption.get();
+                option.removeRule(mapClientNameToRuleName(gameToSearch.getSektor()));
+
+                if(searchOption.get().getRules().size() <= 0){
+                    checker.removeSearchOption(gameToSearch.getName());
+                }
+            }
+            return;
+        }
+
+        Optional<RblGameSearchOption> searchOption = checker.getSearchOptionWithName(gameToSearch.getName());
+
+        if (false == searchOption.isPresent()){
+            RblGameSearchOption newSearchOption = new RblGameSearchOption(gameToSearch.getName());
+            if (gameToSearch.getSektor().equals("B")){
+                newSearchOption.addRule(sektorB);
+            }
+            if (gameToSearch.getSektor().equals("D")){
+                newSearchOption.addRule(sektorD);
+            }
+            if (gameToSearch.getSektor().equals("C")){
+                newSearchOption.addRule(sektorD);
+            }
+            if (gameToSearch.getSektor().equals("A")){
+                newSearchOption.addRule(sektorD);
+            }
+            checker.addSearchOption(newSearchOption);
+        } else {
+
+            if (searchOption.get().containsRule(mapClientNameToRuleName(gameToSearch.getSektor()))){
+                return;
+            }
+
+            if (gameToSearch.getSektor().equals("B")){
+                searchOption.get().addRule(sektorB);
+            }
+            if (gameToSearch.getSektor().equals("D")){
+                searchOption.get().addRule(sektorD);
+            }
+            if (gameToSearch.getSektor().equals("A")){
+                searchOption.get().addRule(sektorA);
+            }
+            if (gameToSearch.getSektor().equals("C")){
+                searchOption.get().addRule(sektorC);
+            }
+        }
+    }
+
+    private String mapClientNameToRuleName(String clientName){
+        return "Sektor " + clientName;
+    }
+
+
 }

@@ -1,13 +1,13 @@
 package de.maxya.inventorytrouble.control.schedule;
 
 import de.maxya.inventorytrouble.boundary.InventoryTroubleApiImpl;
-import de.maxya.inventorytrouble.boundary.model.RBLRuleToSend;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class RblGameSearchOption {
 
@@ -39,5 +39,13 @@ public class RblGameSearchOption {
 
     public void setRules(List<RBLRule> rules) {
         this.rules = rules;
+    }
+
+    public void removeRule(String ruleName) {
+        this.rules = this.rules.stream().filter(rule -> rule.getName().equals(ruleName) == false).collect(Collectors.toList());
+    }
+
+    public boolean containsRule(String ruleName) {
+        return this.rules.stream().filter(rule ->rule.getName().equals(ruleName)).findFirst().isPresent();
     }
 }

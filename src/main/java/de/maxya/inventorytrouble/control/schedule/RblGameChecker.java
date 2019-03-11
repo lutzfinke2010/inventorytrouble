@@ -9,6 +9,8 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class RblGameChecker {
 
@@ -132,5 +134,13 @@ public class RblGameChecker {
         if (!found) {
             this.searchOptionsForGames.add(searchOption);
         }
+    }
+
+    public void removeSearchOption(String name) {
+        this.searchOptionsForGames = this.searchOptionsForGames.stream().filter(option -> option.name != name).collect(Collectors.toList());
+    }
+
+    public Optional<RblGameSearchOption> getSearchOptionWithName(String name) {
+        return this.searchOptionsForGames.stream().filter(option -> option.name == name).findFirst();
     }
 }

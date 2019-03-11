@@ -54,5 +54,6 @@ public interface InventoryTroubleApi {
     @RequestMapping(value="/tenants/{tenantId}/webservicetest", method = RequestMethod.GET)
     String webServiceTest(@PathVariable String tenantId);
 
-
+    @RequestMapping(value="/tenants/{tenantId}/gametosearch", method = RequestMethod.POST, consumes={"application/json; charset=utf-8"})
+    ResponseEntity<Void> addOrRemoveGameToSearch(@PathVariable String tenantId, @RequestBody RBLGameToSearch gameToSearch);
 }

@@ -15,6 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -151,4 +152,17 @@ public class InventoryTroubleApiImpl implements InventoryTroubleApi {
     public String webServiceTest(@PathVariable String tenantId) {
         return "Test OK for TenantId " + tenantId;
     }
+
+    @Override
+    public ResponseEntity<Void> addOrRemoveGameToSearch(@PathVariable String tenantId, @RequestBody RBLGameToSearch gameToSearch) {
+        ResponseEntity<Void> response;
+        if (gameToSearch == null){
+            response = new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }else{
+            schedule.addOrRemoveGameToSearch(gameToSearch);
+            response = new ResponseEntity(HttpStatus.CREATED);
+        }
+        return response;
+    }
+
 }
