@@ -158,6 +158,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ticket_alert_ticket_alert_component__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! ./ticket-alert/ticket-alert.component */ "./src/app/ticket-alert/ticket-alert.component.ts");
 /* harmony import */ var _angular_service_worker__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! @angular/service-worker */ "./node_modules/@angular/service-worker/fesm5/service-worker.js");
 /* harmony import */ var _environments_environment__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! ../environments/environment */ "./src/environments/environment.ts");
+/* harmony import */ var _service_rblgame_searchoptions__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! ./service/rblgame.searchoptions */ "./src/app/service/rblgame.searchoptions.ts");
+
 
 
 
@@ -229,6 +231,7 @@ var AppModule = /** @class */ (function () {
                 { provide: _constants__WEBPACK_IMPORTED_MODULE_21__["BASE_URL_RBL"], useFactory: _constants__WEBPACK_IMPORTED_MODULE_21__["baseUrlFactoryRBL"] },
                 { provide: _constants__WEBPACK_IMPORTED_MODULE_21__["API_SERVER_URL_RBL"], useFactory: _constants__WEBPACK_IMPORTED_MODULE_21__["apiServerUrlFactoryRBL"] },
                 _service_rblgame_service__WEBPACK_IMPORTED_MODULE_19__["RblgameService"],
+                _service_rblgame_searchoptions__WEBPACK_IMPORTED_MODULE_27__["RblSearchOptionsService"],
                 _chatservice_service__WEBPACK_IMPORTED_MODULE_23__["ChatService"],
                 _websocket_service__WEBPACK_IMPORTED_MODULE_22__["WebsocketService"]
             ],
@@ -368,14 +371,10 @@ var Constants = /** @class */ (function () {
     }
     Constants.ETAG_CACHE_LIFETIME = 120000;
     Constants.DEFAULT_TENANT = 'guest';
-    // public static readonly API_SERVER_URL_LOCAL = `http://185.162.251.243:9123/api/v1/tenants/${Constants.DEFAULT_TENANT}`;
-    // public static readonly API_SERVER_URL_PAAS = `http://185.162.251.243:9123/api/v1/tenants/${Constants.DEFAULT_TENANT}`;
-    // public static readonly API_BASE_URL_LOCAL = `http://185.162.251.243:9123/api/v1/tenants/${Constants.DEFAULT_TENANT}`;
-    // public static readonly API_BASE_URL_PAAS = `http://185.162.251.243:9123/api/v1/tenants/${Constants.DEFAULT_TENANT}`;
-    Constants.API_SERVER_URL_LOCAL = "http://localhost:9123/api/v1/tenants/" + Constants.DEFAULT_TENANT;
-    Constants.API_SERVER_URL_PAAS = "http://localhost:9123/api/v1/tenants/" + Constants.DEFAULT_TENANT;
-    Constants.API_BASE_URL_LOCAL = "http://localhost:9123/api/v1/tenants/" + Constants.DEFAULT_TENANT;
-    Constants.API_BASE_URL_PAAS = "http://localhost:9123/api/v1/tenants/" + Constants.DEFAULT_TENANT;
+    Constants.API_SERVER_URL_LOCAL = "http://185.162.251.243:9123/api/v1/tenants/" + Constants.DEFAULT_TENANT;
+    Constants.API_SERVER_URL_PAAS = "http://185.162.251.243:9123/api/v1/tenants/" + Constants.DEFAULT_TENANT;
+    Constants.API_BASE_URL_LOCAL = "http://185.162.251.243:9123/api/v1/tenants/" + Constants.DEFAULT_TENANT;
+    Constants.API_BASE_URL_PAAS = "http://185.162.251.243:9123/api/v1/tenants/" + Constants.DEFAULT_TENANT;
     return Constants;
 }());
 
@@ -428,22 +427,65 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "./node_modules/tslib/tslib.es6.js");
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
 /* harmony import */ var _service_rblgame_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../service/rblgame.service */ "./src/app/service/rblgame.service.ts");
+/* harmony import */ var _service_rblgame_searchoptions__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../service/rblgame.searchoptions */ "./src/app/service/rblgame.searchoptions.ts");
+
 
 
 
 var GameCardListComponent = /** @class */ (function () {
-    function GameCardListComponent(service) {
+    function GameCardListComponent(service, searchOptionService) {
         this.service = service;
+        this.searchOptionService = searchOptionService;
         this.list = [];
+        this.searchOptionList = [];
     }
     GameCardListComponent.prototype.ngOnInit = function () {
         var _this = this;
         this.list = [];
-        this.service.getRBLGames().then(function (games) {
-            _this.list = games;
-        }).catch(function (error) {
+        this.service.getRBLGames()
+            .then(function (games) {
+            games = games.filter(function (game) {
+                return (game.name.startsWith('RB'));
+            });
+            _this.internList = games;
+            _this.addIcons();
+            return _this.searchOptionService.getSearchOptions();
+        })
+            .then(function (searchOptions) {
+            _this.searchOptionList = searchOptions;
+            _this.addsearchOptionsToRblGames();
+        })
+            .catch(function (error) {
             console.log(error);
         });
+    };
+    GameCardListComponent.prototype.addsearchOptionsToRblGames = function () {
+        for (var i = 0; i < this.searchOptionList.length; i++) {
+            for (var j = 0; j < this.internList.length; j++) {
+                if (this.internList[j].name === this.searchOptionList[i].name) {
+                    this.addSektorenToGame(this.internList[j], this.searchOptionList[i].rules);
+                }
+            }
+        }
+        this.list = this.internList;
+    };
+    GameCardListComponent.prototype.addSektorenToGame = function (rblGame, rules) {
+        for (var i = 0; i < rules.length; i++) {
+            if (rblGame.sektoren === undefined) {
+                rblGame.sektoren = [];
+            }
+            rblGame.sektoren.push(rules[i].name);
+        }
+    };
+    GameCardListComponent.prototype.addIcons = function () {
+        for (var j = 0; j < this.internList.length; j++) {
+            if (this.internList[j].name.toLocaleLowerCase().indexOf('hertha') > 0) {
+                this.internList[j].imagePath = 'assets\\icons\\bundesliga\\HerthaBSC.png';
+            }
+            else {
+                this.internList[j].imagePath = 'assets\\icons\\bundesliga\\default.png';
+            }
+        }
     };
     GameCardListComponent = tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Component"])({
@@ -451,7 +493,7 @@ var GameCardListComponent = /** @class */ (function () {
             template: __webpack_require__(/*! ./game-card-list.component.html */ "./src/app/game-card-list/game-card-list.component.html"),
             styles: [__webpack_require__(/*! ./game-card-list.component.css */ "./src/app/game-card-list/game-card-list.component.css")]
         }),
-        tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:paramtypes", [_service_rblgame_service__WEBPACK_IMPORTED_MODULE_2__["RblgameService"]])
+        tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:paramtypes", [_service_rblgame_service__WEBPACK_IMPORTED_MODULE_2__["RblgameService"], _service_rblgame_searchoptions__WEBPACK_IMPORTED_MODULE_3__["RblSearchOptionsService"]])
     ], GameCardListComponent);
     return GameCardListComponent;
 }());
@@ -478,7 +520,7 @@ module.exports = ".example-section {\n  display: flex;\n  align-content: center;
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<mat-card class=\"example-card\" style=\"margin: 5px\">\n  <mat-card-header>\n    <div mat-card-avatar class=\"example-header-image\"></div>\n    <mat-card-title>{{element.name}}</mat-card-title>\n    <mat-card-subtitle>{{element.startdate}}</mat-card-subtitle>\n  </mat-card-header>\n  <mat-card-content>\n    <div id=\"collapser{{element.name}}\" class=\"collapse\">\n      <p class=\"text-primary\">\n        Anzahl Plaetze: {{element.countSitzplaetze}}<br>\n        Anzahl B-Block: {{element.countBBlock}}<br>\n        Anzahl D-Block: {{element.countDBlock}}<br>\n      </p>\n      <section class=\"example-section\">\n        <mat-checkbox class=\"example-margin\" [(ngModel)]=\"sektorA\" (change)=\"checkValue('A',element.name)\">Sektor A</mat-checkbox>\n        <mat-checkbox class=\"example-margin\" [(ngModel)]=\"sektorB\" (change)=\"checkValue('B',element.name)\">Sektor B</mat-checkbox>\n        <mat-checkbox class=\"example-margin\" [(ngModel)]=\"sektorC\" (change)=\"checkValue('C',element.name)\">Sektor C</mat-checkbox>\n        <mat-checkbox class=\"example-margin\" [(ngModel)]=\"sektorD\" (change)=\"checkValue('D',element.name)\">Sektor D</mat-checkbox>\n      </section>\n    </div>\n  </mat-card-content>\n  <mat-card-actions>\n    <div class=\"row\">\n      <a class=\"col-xs-2\" mat-button href=\"#collapser{{element.name}}\" data-toggle=\"collapse\">SHOW MORE</a>\n    </div>\n  </mat-card-actions>\n</mat-card>\n"
+module.exports = "<mat-card class=\"example-card\" style=\"margin: 5px\">\n  <mat-card-header>\n    <div mat-card-avatar class=\"example-header-image\"></div>\n    <mat-card-title>{{element.name}}</mat-card-title>\n    <mat-card-subtitle>{{element.startdate}}</mat-card-subtitle>\n    <img src=\"{{element.imagePath}}\">\n  </mat-card-header>\n  <mat-card-content>\n    <div id=\"collapser{{element.name}}\" class=\"collapse\">\n      <p class=\"text-primary\">\n        Anzahl Plaetze: {{element.countSitzplaetze}}<br>\n        Anzahl B-Block: {{element.countBBlock}}<br>\n        Anzahl D-Block: {{element.countDBlock}}<br>\n      </p>\n      <section class=\"example-section\">\n        <mat-checkbox class=\"example-margin\" [(ngModel)]=\"sektorA\" (change)=\"checkValue('A',element.name)\">Sektor A</mat-checkbox>\n        <mat-checkbox class=\"example-margin\" [(ngModel)]=\"sektorB\" (change)=\"checkValue('B',element.name)\">Sektor B</mat-checkbox>\n        <mat-checkbox class=\"example-margin\" [(ngModel)]=\"sektorC\" (change)=\"checkValue('C',element.name)\">Sektor C</mat-checkbox>\n        <mat-checkbox class=\"example-margin\" [(ngModel)]=\"sektorD\" (change)=\"checkValue('D',element.name)\">Sektor D</mat-checkbox>\n      </section>\n    </div>\n  </mat-card-content>\n  <mat-card-actions>\n    <div class=\"row\">\n      <a class=\"col-xs-2\" mat-button href=\"#collapser{{element.name}}\" data-toggle=\"collapse\">SHOW MORE</a>\n    </div>\n  </mat-card-actions>\n</mat-card>\n"
 
 /***/ }),
 
@@ -494,9 +536,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GameCardComponent", function() { return GameCardComponent; });
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "./node_modules/tslib/tslib.es6.js");
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
-/* harmony import */ var _GlobalSettings__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../GlobalSettings */ "./src/app/GlobalSettings.ts");
-/* harmony import */ var _service_rblgame_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../service/rblgame.service */ "./src/app/service/rblgame.service.ts");
-
+/* harmony import */ var _service_rblgame_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../service/rblgame.service */ "./src/app/service/rblgame.service.ts");
 
 
 
@@ -510,22 +550,22 @@ var GameCardComponent = /** @class */ (function () {
     }
     GameCardComponent.prototype.ngOnInit = function () {
         console.log('element: ', this.element);
-    };
-    GameCardComponent.prototype.getKosten = function () {
-        var kosten = 0;
-        if (this.sektorA) {
-            kosten += _GlobalSettings__WEBPACK_IMPORTED_MODULE_2__["GlobalSettings"].KostenProSektor;
+        if (this.element && this.element.sektoren) {
+            for (var i = 0; i < this.element.sektoren.length; i++) {
+                if (this.element.sektoren[i] === 'Sektor A') {
+                    this.sektorA = true;
+                }
+                if (this.element.sektoren[i] === 'Sektor B') {
+                    this.sektorB = true;
+                }
+                if (this.element.sektoren[i] === 'Sektor C') {
+                    this.sektorC = true;
+                }
+                if (this.element.sektoren[i] === 'Sektor D') {
+                    this.sektorD = true;
+                }
+            }
         }
-        if (this.sektorB) {
-            kosten += _GlobalSettings__WEBPACK_IMPORTED_MODULE_2__["GlobalSettings"].KostenProSektor;
-        }
-        if (this.sektorC) {
-            kosten += _GlobalSettings__WEBPACK_IMPORTED_MODULE_2__["GlobalSettings"].KostenProSektor;
-        }
-        if (this.sektorD) {
-            kosten += _GlobalSettings__WEBPACK_IMPORTED_MODULE_2__["GlobalSettings"].KostenProSektor;
-        }
-        return kosten;
     };
     GameCardComponent.prototype.checkValue = function (sektor, game) {
         if (sektor === 'A') {
@@ -569,7 +609,7 @@ var GameCardComponent = /** @class */ (function () {
             template: __webpack_require__(/*! ./game-card.component.html */ "./src/app/game-card/game-card.component.html"),
             styles: [__webpack_require__(/*! ./game-card.component.css */ "./src/app/game-card/game-card.component.css")]
         }),
-        tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:paramtypes", [_service_rblgame_service__WEBPACK_IMPORTED_MODULE_3__["RblgameService"]])
+        tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:paramtypes", [_service_rblgame_service__WEBPACK_IMPORTED_MODULE_2__["RblgameService"]])
     ], GameCardComponent);
     return GameCardComponent;
 }());
@@ -839,6 +879,60 @@ var ServerOptionsComponent = /** @class */ (function () {
 
 /***/ }),
 
+/***/ "./src/app/service/rblgame.searchoptions.ts":
+/*!**************************************************!*\
+  !*** ./src/app/service/rblgame.searchoptions.ts ***!
+  \**************************************************/
+/*! exports provided: RblSearchOptionsService */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RblSearchOptionsService", function() { return RblSearchOptionsService; });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "./node_modules/tslib/tslib.es6.js");
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/common/http */ "./node_modules/@angular/common/fesm5/http.js");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../constants */ "./src/app/constants.ts");
+
+
+
+
+var RblSearchOptionsService = /** @class */ (function () {
+    function RblSearchOptionsService(http, apiBasePath, apiServerUrl) {
+        this.http = http;
+        this.apiBasePath = apiBasePath;
+        this.apiServerUrl = apiServerUrl;
+        this.MODULE_ID_FOR_ETAGS = 'INVENTORYTROUBLE';
+        this.showAsWarning = false;
+    }
+    RblSearchOptionsService.prototype.getRBLGameNames = function () {
+        return this.http.get(this.apiServerUrl + '/gamenames').toPromise();
+    };
+    RblSearchOptionsService.prototype.getSearchOptions = function () {
+        return this.http.get(this.apiServerUrl + '/searchoptions').toPromise();
+    };
+    RblSearchOptionsService.prototype.setSearchOptions = function (searchOption) {
+        return this.http.put(this.apiServerUrl + '/searchoptionschange', searchOption).toPromise();
+    };
+    RblSearchOptionsService.prototype.getRules = function () {
+        return this.http.get(this.apiServerUrl + '/rule').toPromise();
+    };
+    RblSearchOptionsService.prototype.getClassForRuleName = function (gameName, rule) {
+        return 'btn btn-success btn-lg';
+    };
+    RblSearchOptionsService = tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
+        Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Injectable"])(),
+        tslib__WEBPACK_IMPORTED_MODULE_0__["__param"](1, Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Inject"])(_constants__WEBPACK_IMPORTED_MODULE_3__["BASE_URL_RBL"])),
+        tslib__WEBPACK_IMPORTED_MODULE_0__["__param"](2, Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Inject"])(_constants__WEBPACK_IMPORTED_MODULE_3__["API_SERVER_URL_RBL"])),
+        tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:paramtypes", [_angular_common_http__WEBPACK_IMPORTED_MODULE_2__["HttpClient"], Object, Object])
+    ], RblSearchOptionsService);
+    return RblSearchOptionsService;
+}());
+
+
+
+/***/ }),
+
 /***/ "./src/app/service/rblgame.service.ts":
 /*!********************************************!*\
   !*** ./src/app/service/rblgame.service.ts ***!
@@ -946,7 +1040,7 @@ var TicketAlertComponent = /** @class */ (function () {
         this.service = service;
         this.title = 'Ticket Ale1rt';
         this.description = 'Ticketalert für alle aktiven Spiele';
-        this.version = '2.6';
+        this.version = '3.0';
         this.rblRuleResults = [];
         this.status = true;
         this.statusWebSocket = false;

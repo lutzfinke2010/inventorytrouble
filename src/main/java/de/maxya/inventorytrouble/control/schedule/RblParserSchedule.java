@@ -251,10 +251,9 @@ public class RblParserSchedule {
         RBLRuleSektorC sektorC = new RBLRuleSektorC();
         RBLRuleSektorD sektorD = new RBLRuleSektorD();
 
+        Optional<RblGameSearchOption> searchOption = checker.getSearchOptionWithName(gameToSearch.getName());
+
         if (false == gameToSearch.isAktiv()){
-            Optional<RblGameSearchOption> searchOption =
-                    checker.getSearchOptions().stream().filter( option -> option.name == gameToSearch.getName()
-            ).findFirst();
             if (searchOption.isPresent()){
                 RblGameSearchOption option = searchOption.get();
                 option.removeRule(mapClientNameToRuleName(gameToSearch.getSektor()));
@@ -266,20 +265,19 @@ public class RblParserSchedule {
             return;
         }
 
-        Optional<RblGameSearchOption> searchOption = checker.getSearchOptionWithName(gameToSearch.getName());
 
         if (false == searchOption.isPresent()){
             RblGameSearchOption newSearchOption = new RblGameSearchOption(gameToSearch.getName());
+            if (gameToSearch.getSektor().equals("A")){
+                newSearchOption.addRule(sektorA);
+            }
             if (gameToSearch.getSektor().equals("B")){
                 newSearchOption.addRule(sektorB);
             }
-            if (gameToSearch.getSektor().equals("D")){
-                newSearchOption.addRule(sektorD);
-            }
             if (gameToSearch.getSektor().equals("C")){
-                newSearchOption.addRule(sektorD);
+                newSearchOption.addRule(sektorC);
             }
-            if (gameToSearch.getSektor().equals("A")){
+            if (gameToSearch.getSektor().equals("D")){
                 newSearchOption.addRule(sektorD);
             }
             checker.addSearchOption(newSearchOption);

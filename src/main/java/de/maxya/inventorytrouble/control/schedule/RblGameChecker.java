@@ -137,10 +137,10 @@ public class RblGameChecker {
     }
 
     public void removeSearchOption(String name) {
-        this.searchOptionsForGames = this.searchOptionsForGames.stream().filter(option -> option.name != name).collect(Collectors.toList());
+        this.searchOptionsForGames = this.searchOptionsForGames.stream().filter(option -> option.name.equals(name) == false).collect(Collectors.toList());
     }
 
     public Optional<RblGameSearchOption> getSearchOptionWithName(String name) {
-        return this.searchOptionsForGames.stream().filter(option -> option.name == name).findFirst();
+        return this.searchOptionsForGames.stream().filter(option -> option.name.equals(name)).findFirst();
     }
 }
