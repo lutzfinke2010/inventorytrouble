@@ -552,16 +552,16 @@ var GameCardComponent = /** @class */ (function () {
         console.log('element: ', this.element);
         if (this.element && this.element.sektoren) {
             for (var i = 0; i < this.element.sektoren.length; i++) {
-                if (this.element.sektoren[i] === 'Sektor A') {
+                if (this.element.sektoren[i].startsWith('Sektor A')) {
                     this.sektorA = true;
                 }
-                if (this.element.sektoren[i] === 'Sektor B') {
+                if (this.element.sektoren[i].startsWith('Sektor B')) {
                     this.sektorB = true;
                 }
-                if (this.element.sektoren[i] === 'Sektor C') {
+                if (this.element.sektoren[i].startsWith('Sektor C')) {
                     this.sektorC = true;
                 }
-                if (this.element.sektoren[i] === 'Sektor D') {
+                if (this.element.sektoren[i].startsWith('Sektor D')) {
                     this.sektorD = true;
                 }
             }
@@ -1040,7 +1040,7 @@ var TicketAlertComponent = /** @class */ (function () {
         this.service = service;
         this.title = 'Ticket Ale1rt';
         this.description = 'Ticketalert für alle aktiven Spiele';
-        this.version = '3.0';
+        this.version = '3.1';
         this.rblRuleResults = [];
         this.status = true;
         this.statusWebSocket = false;
@@ -1315,7 +1315,7 @@ Object(_angular_platform_browser_dynamic__WEBPACK_IMPORTED_MODULE_1__["platformB
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! /home/lutz/IdeaProjects/testAngularMaterial/src/main.ts */"./src/main.ts");
+module.exports = __webpack_require__(/*! /home/lutz/IdeaProjects/rblscannerclient/src/main.ts */"./src/main.ts");
 
 
 /***/ })
