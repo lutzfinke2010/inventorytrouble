@@ -1,9 +1,7 @@
 package de.maxya.inventorytrouble.control.login;
 
-import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.*;
-import org.w3c.dom.html.HTMLButtonElement;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -11,7 +9,11 @@ import java.util.List;
 
 public class HtmlUnitExample {
 
-    public String login() throws IOException {
+    public String loadTicketboerse() throws IOException {
+        return login();
+    }
+
+    private String login() throws IOException {
         final WebClient webClient = new WebClient();
         webClient.getOptions().setThrowExceptionOnScriptError(false);
         String url = "http://tickets.dierotenbullen.com/shop?wes=empty_session_111&language=1&shopid=111&nextstate=8a&backloginstate=2";
@@ -29,13 +31,12 @@ public class HtmlUnitExample {
 
         Iterator var3 = form.getElementsByTagName("button").iterator();
 
-
-        while(var3.hasNext()) {
-            HtmlElement elt = (HtmlElement)var3.next();
+        while (var3.hasNext()) {
+            HtmlElement elt = (HtmlElement) var3.next();
             if (elt instanceof HtmlButton) {
                 HtmlButton submit = ((HtmlButton) elt);
                 System.out.println("HtmlButton found: " + submit.getAttribute("type"));
-                if (submit != null){
+                if (submit != null) {
                     final HtmlTextInput textField = form.getInputByName("kundennr");
                     textField.setValueAttribute("ebaykleinanzeigenmaxmueller@gmail.com");
                     final HtmlPasswordInput textFieldpass = form.getInputByName("passwort");
@@ -49,20 +50,20 @@ public class HtmlUnitExample {
 
                     Iterator elements = domelement.getChildElements().iterator();
 
-                    while(elements.hasNext()) {
+                    while (elements.hasNext()) {
                         DomElement currenElement = (DomElement) elements.next();
                         currenElement.getNodeValue();
                     }
 
-                    List<Object>  scripte = page2.getByXPath("//script[@type='application/ld+json']");
+                    List<Object> scripte = page2.getByXPath("//script[@type='application/ld+json']");
 
                     Iterator scripteIterator = scripte.iterator();
 
-                    while(scripteIterator.hasNext()) {
+                    while (scripteIterator.hasNext()) {
                         DomElement currenElement = (DomElement) scripteIterator.next();
-                        if ("".equals(currenElement.getAttribute("type")) ){
+                        if ("".equals(currenElement.getAttribute("type"))) {
                             System.out.println("json:" + currenElement.getNodeValue());
-                        }else{
+                        } else {
                             String type = currenElement.getAttribute("type");
                             System.out.println("type:" + type);
                         }
@@ -72,11 +73,24 @@ public class HtmlUnitExample {
 
                     HtmlPage page3 = webClient.getPage("https://tickets.dierotenbullen.com/" + dataURL);
 
+                    List<HtmlAnchor> anchorsList = page3.getAnchors();
+                    Iterator anchorsIterator = anchorsList.iterator();
+
+                    while (anchorsIterator.hasNext()) {
+                        HtmlAnchor anchor = (HtmlAnchor) anchorsIterator.next();
+                        if (anchor.hasAttribute("data-block-link-anchor")) {
+                            if ("2955".equals(anchor.getAttribute("data-performanceid"))) {
+                                HtmlPage page4 = webClient.getPage("https://tickets.dierotenbullen.com/" + anchor.getHrefAttribute());
+                                return page4.asXml();
+                            }
+                        }
+                    }
+
                     return page3.asXml();
                 }
                 break;
-            }else{
-                System.out.println("TypeOf : " +  elt.getNodeName());
+            } else {
+                System.out.println("TypeOf : " + elt.getNodeName());
             }
         }
 
@@ -94,6 +108,6 @@ public class HtmlUnitExample {
         final HtmlPage page2 = button.click();
         return page2.toString();
 */
-return "";
+        return "";
     }
 }

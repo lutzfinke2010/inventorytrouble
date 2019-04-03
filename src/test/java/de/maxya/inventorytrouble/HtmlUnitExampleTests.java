@@ -17,7 +17,7 @@ public class HtmlUnitExampleTests {
         HtmlUnitExample ex = new HtmlUnitExample();
 
         //act
-        String actual = ex.login();
+        String actual = ex.loadTicketboerse();
         System.out.println("PageContent:" + actual);
         Assert.assertTrue(actual.contains("Müller"));
 
