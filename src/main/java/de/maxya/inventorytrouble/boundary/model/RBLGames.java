@@ -17,6 +17,9 @@ public class RBLGames {
     private Long id;
     private List<RBLSitzplatz> plaetze;
 
+
+    private String gameId;
+
     public int getCountSitzplaetze() {
         return countSitzplaetze;
     }
@@ -208,5 +211,13 @@ public class RBLGames {
             }
         }
         return erg;
+    }
+
+    public void setGameId(String gameId) {
+        this.gameId = gameId;
+    }
+
+    public String getGameId() {
+        return gameId;
     }
 }

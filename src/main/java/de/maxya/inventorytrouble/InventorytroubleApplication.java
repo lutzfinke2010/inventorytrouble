@@ -14,7 +14,8 @@ import org.springframework.kafka.listener.SeekToCurrentErrorHandler;
 @ComponentScan(basePackages = {"de.maxya.inventorytrouble",
         "de.maxya.inventorytrouble.boundary",
         "de.maxya.inventorytrouble.control",
-        "de.maxya.inventorytrouble.entity.repository"})
+        "de.maxya.inventorytrouble.entity.repository",
+        "de.maxya.inventorytrouble.control.login"})
 public class InventorytroubleApplication {
 
     public static void main(String[] args) {

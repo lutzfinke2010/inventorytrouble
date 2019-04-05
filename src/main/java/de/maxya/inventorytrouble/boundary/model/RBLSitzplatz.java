@@ -102,4 +102,13 @@ public class RBLSitzplatz {
         platz.setSitz(""+sitz);
         return platz;
     }
+
+    public static RBLSitzplatz createPlaceFromString(String kategorie, String bereich, String reihe, String sitz ){
+        RBLSitzplatz platz = new RBLSitzplatz();
+        platz.setKategorie(kategorie);
+        platz.setBereich(bereich);
+        platz.setReihe(reihe);
+        platz.setSitz(sitz);
+        return platz;
+    }
 }

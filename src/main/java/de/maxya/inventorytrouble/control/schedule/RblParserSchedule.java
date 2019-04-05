@@ -9,6 +9,7 @@ import de.maxya.inventorytrouble.boundary.model.RBLGames;
 import de.maxya.inventorytrouble.boundary.model.RBLRuleResultResponse;
 import de.maxya.inventorytrouble.control.RBLGameService;
 import de.maxya.inventorytrouble.control.email.MailController;
+import de.maxya.inventorytrouble.control.login.HtmlUnitExample;
 import de.maxya.inventorytrouble.control.mapper.RBLGameSearchOptionMapper;
 import de.maxya.inventorytrouble.control.rblparser.RBLPageParser;
 import de.maxya.inventorytrouble.control.rules.*;
@@ -20,6 +21,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -38,7 +40,7 @@ public class RblParserSchedule {
     private WebSocketMessageSender webSocketSender;
 
     @Autowired
-    RBLPageParser parser;
+    HtmlUnitExample parser; //RBLPageParser parser;
 
     @Autowired
     RBLGameService service;
@@ -54,18 +56,6 @@ public class RblParserSchedule {
 
     public RblParserSchedule() {
         checker = new RblGameChecker();
-//        RBLRuleSektorB b = new RBLRuleSektorB();
-//        RBLRuleSektorD d = new RBLRuleSektorD();
-//        RBLRuleSektorD dMitNachbarn = new RBLRuleSektorD();
-//        dMitNachbarn.searchNeighbours(true);
-//
-//        RblGameSearchOption searchHertha = new RblGameSearchOption("RB Leipzig-Hertha BSC");
-//        searchHertha.addRule(b);
-//
-//        checker.addSearchOption(searchHertha);
-//
-//        checker.logSearchOptions();
-
         listOfGameNames = new ArrayList<>();
     }
 
@@ -97,15 +87,28 @@ public class RblParserSchedule {
             count = 1;
         }
 
-
-        List<RBLGames> erg = parser.extractFreePlaces();
-        if (parser.isInWarteRaum()) {
-            LOGGER.log(Level.WARN, "Warteraum wait "+MAX_WAIT_CYCLES+" Cycles");
-            waitSomeCycles = MAX_WAIT_CYCLES;
-            return;
-        } else {
-            waitSomeCycles = 1;
+        if (parser.isLoggedIn() == false){
+            try {
+                parser.refreshLogin();
+            } catch (IOException e) {
+                LOGGER.error("refreshLogin fehlgeschlagen" + e.getMessage());
+            }
         }
+
+        try {
+            parser.loadTicketboerse();
+        } catch (IOException e) {
+            LOGGER.error("loadTicketboerse fehlgeschlagen" + e.getMessage());
+        }
+        List<RBLGames> erg = parser.getAvaiableGames();
+
+//        if (parser.isInWarteRaum()) {
+//            LOGGER.log(Level.WARN, "Warteraum wait "+MAX_WAIT_CYCLES+" Cycles");
+//            waitSomeCycles = MAX_WAIT_CYCLES;
+//            return;
+//        } else {
+//            waitSomeCycles = 1;
+//        }
 
         fillGameList(erg);
 
