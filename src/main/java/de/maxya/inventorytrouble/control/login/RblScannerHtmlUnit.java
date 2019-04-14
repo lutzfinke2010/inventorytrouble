@@ -1,17 +1,14 @@
 package de.maxya.inventorytrouble.control.login;
 
-import com.gargoylesoftware.css.parser.CSSException;
-import com.gargoylesoftware.css.parser.CSSParseException;
-import com.gargoylesoftware.htmlunit.IncorrectnessListener;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.*;
 import de.maxya.inventorytrouble.boundary.InventoryTroubleApiImpl;
 import de.maxya.inventorytrouble.boundary.model.RBLGames;
 import de.maxya.inventorytrouble.boundary.model.RBLSitzplatz;
-import org.apache.commons.logging.LogFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -19,10 +16,12 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.logging.Level;
 
 @Service
-public class HtmlUnitExample {
+public class RblScannerHtmlUnit {
+
+    @Autowired
+    UserDataService userDataService;
 
     private WebClient webClient;
     private String shortbaseUrl = "http://tickets.dierotenbullen.com";
@@ -31,12 +30,16 @@ public class HtmlUnitExample {
     private HtmlPage pageAfterLogin;
     private boolean loggedIn;
 
-    public HtmlUnitExample(){
+    public RblScannerHtmlUnit(){
         loggedIn = false;
     }
 
     public List<RBLGames> getAvaiableGames(){
         return listOfGames;
+    }
+
+    public void setUserDataService(UserDataService userDataService){
+        this.userDataService = userDataService;
     }
 
     public String loadTicketboerse() throws IOException {
@@ -73,7 +76,6 @@ public class HtmlUnitExample {
     private void initWebClient() {
         listOfGames = new ArrayList<>();
         webClient = new WebClient();
-//        webClient.getOptions().setJavaScriptEnabled(false);
         webClient.getOptions().setThrowExceptionOnScriptError(false);
         webClient.setHTMLParserListener(new SilentHtmlParserListener());
     }
@@ -153,6 +155,8 @@ public class HtmlUnitExample {
     private HtmlPage login() throws IOException {
         String url = "http://tickets.dierotenbullen.com/shop?wes=empty_session_111&language=1&shopid=111&nextstate=8a&backloginstate=2";
 
+        UserData userData = userDataService.getUserData();
+
         final HtmlPage page1 = webClient.getPage(url);
 
         List<HtmlForm> forms = page1.getForms();
@@ -169,9 +173,9 @@ public class HtmlUnitExample {
                 HtmlButton submit = ((HtmlButton) elt);
                 if (submit != null) {
                     final HtmlTextInput textField = form.getInputByName("kundennr");
-                    textField.setValueAttribute("ebaykleinanzeigenmaxmueller@gmail.com");
+                    textField.setValueAttribute(userData.getName());
                     final HtmlPasswordInput textFieldpass = form.getInputByName("passwort");
-                    textFieldpass.setValueAttribute("maxmueller123");
+                    textFieldpass.setValueAttribute(userData.getPasswort());
                     pageAfterLogin = submit.click();
                     break;
                 }
@@ -189,6 +193,7 @@ public class HtmlUnitExample {
 
         return gameListAfterLogin;
     }
+
 
     private HtmlPage openStartPageForGameById(HtmlPage page2, String playId) throws IOException {
         List<HtmlAnchor> anchorsList = page2.getAnchors();

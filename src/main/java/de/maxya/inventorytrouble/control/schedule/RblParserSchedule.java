@@ -1,17 +1,13 @@
 package de.maxya.inventorytrouble.control.schedule;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.maxya.inventorytrouble.boundary.InventoryTroubleApiImpl;
 import de.maxya.inventorytrouble.boundary.model.RBLGameSearchOptionToSend;
 import de.maxya.inventorytrouble.boundary.model.RBLGameToSearch;
 import de.maxya.inventorytrouble.boundary.model.RBLGames;
-import de.maxya.inventorytrouble.boundary.model.RBLRuleResultResponse;
 import de.maxya.inventorytrouble.control.RBLGameService;
 import de.maxya.inventorytrouble.control.email.MailController;
-import de.maxya.inventorytrouble.control.login.HtmlUnitExample;
+import de.maxya.inventorytrouble.control.login.RblScannerHtmlUnit;
 import de.maxya.inventorytrouble.control.mapper.RBLGameSearchOptionMapper;
-import de.maxya.inventorytrouble.control.rblparser.RBLPageParser;
 import de.maxya.inventorytrouble.control.rules.*;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -26,7 +22,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class RblParserSchedule {
 
@@ -40,7 +35,7 @@ public class RblParserSchedule {
     private WebSocketMessageSender webSocketSender;
 
     @Autowired
-    HtmlUnitExample parser; //RBLPageParser parser;
+    RblScannerHtmlUnit parser; //RBLPageParser parser;
 
     @Autowired
     RBLGameService service;
@@ -53,6 +48,11 @@ public class RblParserSchedule {
 
     private RblGameChecker checker;
     private List<String> listOfGameNames;
+    int number = 0;
+
+    int waitSomeCycles = 1;
+    int count = 1;
+
 
     public RblParserSchedule() {
         checker = new RblGameChecker();
@@ -62,12 +62,6 @@ public class RblParserSchedule {
     public List<RblGameSearchOption> getSearchOptions() {
         return checker.getSearchOptions();
     }
-
-    int number = 0;
-
-    int waitSomeCycles = 1;
-    int count = 1;
-
 
     @Scheduled(initialDelay = 1000, fixedDelay = FIXED_DELAY)
     public void run() {
@@ -87,12 +81,8 @@ public class RblParserSchedule {
             count = 1;
         }
 
-        if (parser.isLoggedIn() == false){
-            try {
-                parser.refreshLogin();
-            } catch (IOException e) {
-                LOGGER.error("refreshLogin fehlgeschlagen" + e.getMessage());
-            }
+        if (number % 400 == 0 || !parser.isLoggedIn()) {
+            login();
         }
 
         try {
@@ -102,15 +92,8 @@ public class RblParserSchedule {
         }
         List<RBLGames> erg = parser.getAvaiableGames();
 
-//        if (parser.isInWarteRaum()) {
-//            LOGGER.log(Level.WARN, "Warteraum wait "+MAX_WAIT_CYCLES+" Cycles");
-//            waitSomeCycles = MAX_WAIT_CYCLES;
-//            return;
-//        } else {
-//            waitSomeCycles = 1;
-//        }
-
         fillGameList(erg);
+
 
         if (number % 20 == 0) {
             LOGGER.log(Level.INFO, "Count: " + service.count());
@@ -118,12 +101,10 @@ public class RblParserSchedule {
             checker.logSearchOptions();
             webSocketSender.reset().setSearchOptions(checker.getSearchOptionsForGames()).send();
             checkAvaiableGames(erg);
-            number = 1;
         }
         number++;
 
-
-        if (erg != null && erg.size() > 0) {
+        if (erg.size() > 0) {
             webSocketSender.reset().setSearchOptions(checker.getSearchOptionsForGames())
                     .setRBLGames(erg)
                     .send();
@@ -140,7 +121,6 @@ public class RblParserSchedule {
 
         String text = "Anzahl Spiele: " + erg.size() + "</br></br>";
         LOGGER.info(text);
-
 
         for (Iterator<RBLGames> itPlaces = checker.getGamesToSave().iterator(); itPlaces.hasNext(); ) {
             RBLGames game = itPlaces.next();
@@ -182,17 +162,32 @@ public class RblParserSchedule {
         }
     }
 
+    private void login() {
+        try {
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!1111");
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!1111");
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!1111");
+            System.out.println("!!!!!!!!! LOGIN !!!!!!!!!!!!1111");
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!1111");
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!1111");
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!1111");
+            parser.refreshLogin();
+        } catch (IOException e) {
+            LOGGER.error("refreshLogin fehlgeschlagen" + e.getMessage());
+        }
+    }
+
     private void checkAvaiableGames(List<RBLGames> erg) {
         List<String> gamesAvaiable = new ArrayList<>();
         List<RblGameSearchOption> options = checker.getSearchOptionsForGames();
-        erg.stream().forEach(rblGames->{
-           options.stream().forEach(option->{
-               if (option.name.equals(rblGames.getName())){
-                   gamesAvaiable.add(option.name);
-               }
-           });
+        erg.stream().forEach(rblGames -> {
+            options.stream().forEach(option -> {
+                if (option.name.equals(rblGames.getName())) {
+                    gamesAvaiable.add(option.name);
+                }
+            });
         });
-        gamesAvaiable.stream().forEach(avaibleGame->{
+        gamesAvaiable.stream().forEach(avaibleGame -> {
             LOGGER.info("Game vorhanden: " + avaibleGame);
         });
     }
@@ -256,12 +251,12 @@ public class RblParserSchedule {
 
         Optional<RblGameSearchOption> searchOption = checker.getSearchOptionWithName(gameToSearch.getName());
 
-        if (false == gameToSearch.isAktiv()){
-            if (searchOption.isPresent()){
+        if (false == gameToSearch.isAktiv()) {
+            if (searchOption.isPresent()) {
                 RblGameSearchOption option = searchOption.get();
                 option.removeRule(mapClientNameToRuleName(gameToSearch.getSektor()));
 
-                if(searchOption.get().getRules().size() <= 0){
+                if (searchOption.get().getRules().size() <= 0) {
                     checker.removeSearchOption(gameToSearch.getName());
                 }
             }
@@ -269,43 +264,43 @@ public class RblParserSchedule {
         }
 
 
-        if (false == searchOption.isPresent()){
+        if (false == searchOption.isPresent()) {
             RblGameSearchOption newSearchOption = new RblGameSearchOption(gameToSearch.getName());
-            if (gameToSearch.getSektor().equals("A")){
+            if (gameToSearch.getSektor().equals("A")) {
                 newSearchOption.addRule(sektorA);
             }
-            if (gameToSearch.getSektor().equals("B")){
+            if (gameToSearch.getSektor().equals("B")) {
                 newSearchOption.addRule(sektorB);
             }
-            if (gameToSearch.getSektor().equals("C")){
+            if (gameToSearch.getSektor().equals("C")) {
                 newSearchOption.addRule(sektorC);
             }
-            if (gameToSearch.getSektor().equals("D")){
+            if (gameToSearch.getSektor().equals("D")) {
                 newSearchOption.addRule(sektorD);
             }
             checker.addSearchOption(newSearchOption);
         } else {
 
-            if (searchOption.get().containsRule(mapClientNameToRuleName(gameToSearch.getSektor()))){
+            if (searchOption.get().containsRule(mapClientNameToRuleName(gameToSearch.getSektor()))) {
                 return;
             }
 
-            if (gameToSearch.getSektor().equals("B")){
+            if (gameToSearch.getSektor().equals("B")) {
                 searchOption.get().addRule(sektorB);
             }
-            if (gameToSearch.getSektor().equals("D")){
+            if (gameToSearch.getSektor().equals("D")) {
                 searchOption.get().addRule(sektorD);
             }
-            if (gameToSearch.getSektor().equals("A")){
+            if (gameToSearch.getSektor().equals("A")) {
                 searchOption.get().addRule(sektorA);
             }
-            if (gameToSearch.getSektor().equals("C")){
+            if (gameToSearch.getSektor().equals("C")) {
                 searchOption.get().addRule(sektorC);
             }
         }
     }
 
-    private String mapClientNameToRuleName(String clientName){
+    private String mapClientNameToRuleName(String clientName) {
         return "Sektor " + clientName;
     }
 
