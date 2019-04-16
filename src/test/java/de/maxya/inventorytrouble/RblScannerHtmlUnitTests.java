@@ -15,7 +15,7 @@ import java.io.IOException;
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = UserDataService.class)
 @SpringBootTest
-public class HtmlUnitExampleTests {
+public class RblScannerHtmlUnitTests {
 
     @Test
     public void test_loadTicketboerse_coontainsMuellerOrBrunner() throws IOException {
@@ -28,7 +28,10 @@ public class HtmlUnitExampleTests {
         ex.refreshLogin();
         String actual = ex.loadTicketboerse();
         System.out.println("PageContent:" + actual);
-        Assert.assertTrue(actual.contains("Brunner") || actual.contains("Müller"));
+        Assert.assertTrue(
+                actual.contains("Brunner") ||
+                         actual.contains("Müller") ||
+                        actual.contains("Meyer"));
 
         //assert
         Assert.assertEquals(1, 1);

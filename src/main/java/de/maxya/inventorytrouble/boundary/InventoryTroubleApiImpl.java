@@ -5,6 +5,7 @@ import de.maxya.inventorytrouble.boundary.model.*;
 import de.maxya.inventorytrouble.boundary.rest.InventoryTroubleApi;
 import de.maxya.inventorytrouble.control.ArtikelService;
 import de.maxya.inventorytrouble.control.RBLGameService;
+import de.maxya.inventorytrouble.control.login.UserData;
 import de.maxya.inventorytrouble.control.rblparser.RBLPageParser;
 import de.maxya.inventorytrouble.control.rules.RBLRuleSektorA;
 import de.maxya.inventorytrouble.control.rules.RBLRuleSektorB;
@@ -163,6 +164,15 @@ public class InventoryTroubleApiImpl implements InventoryTroubleApi {
             response = new ResponseEntity(HttpStatus.CREATED);
         }
         return response;
+    }
+
+    @Override
+    public String getUserName() {
+        UserData username = schedule.getUserData();
+        if (username != null){
+            return username.getName();
+        }
+        return "no User found";
     }
 
 }

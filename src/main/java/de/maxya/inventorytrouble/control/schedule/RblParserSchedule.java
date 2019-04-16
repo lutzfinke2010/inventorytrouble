@@ -7,6 +7,7 @@ import de.maxya.inventorytrouble.boundary.model.RBLGames;
 import de.maxya.inventorytrouble.control.RBLGameService;
 import de.maxya.inventorytrouble.control.email.MailController;
 import de.maxya.inventorytrouble.control.login.RblScannerHtmlUnit;
+import de.maxya.inventorytrouble.control.login.UserData;
 import de.maxya.inventorytrouble.control.mapper.RBLGameSearchOptionMapper;
 import de.maxya.inventorytrouble.control.rules.*;
 import org.apache.logging.log4j.Level;
@@ -72,6 +73,7 @@ public class RblParserSchedule {
             LOGGER.info("RBL-Parser stopped");
             return;
         }
+
         if (count < waitSomeCycles) {
             count++;
             webSocketSender.reset().setWaitRoomCounter(count).send();
@@ -89,11 +91,11 @@ public class RblParserSchedule {
             parser.loadTicketboerse();
         } catch (IOException e) {
             LOGGER.error("loadTicketboerse fehlgeschlagen" + e.getMessage());
+
         }
         List<RBLGames> erg = parser.getAvaiableGames();
 
         fillGameList(erg);
-
 
         if (number % 20 == 0) {
             LOGGER.log(Level.INFO, "Count: " + service.count());
@@ -305,4 +307,7 @@ public class RblParserSchedule {
     }
 
 
+    public UserData getUserData() {
+        return parser.getUserData();
+    }
 }

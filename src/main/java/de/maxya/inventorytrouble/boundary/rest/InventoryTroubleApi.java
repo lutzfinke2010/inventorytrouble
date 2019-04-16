@@ -3,10 +3,7 @@ package de.maxya.inventorytrouble.boundary.rest;
 import de.maxya.inventorytrouble.boundary.model.*;
 import de.maxya.inventorytrouble.control.schedule.RblGameSearchOption;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -56,4 +53,7 @@ public interface InventoryTroubleApi {
 
     @RequestMapping(value="/tenants/{tenantId}/gametosearch", method = RequestMethod.POST, consumes={"application/json; charset=utf-8"})
     ResponseEntity<Void> addOrRemoveGameToSearch(@PathVariable String tenantId, @RequestBody RBLGameToSearch gameToSearch);
+
+    @GetMapping(value="/tenants/{tenantId}/username")
+    String getUserName();
 }

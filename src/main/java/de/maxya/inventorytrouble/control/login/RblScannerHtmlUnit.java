@@ -23,6 +23,8 @@ public class RblScannerHtmlUnit {
     @Autowired
     UserDataService userDataService;
 
+    UserData userData;
+
     private WebClient webClient;
     private String shortbaseUrl = "http://tickets.dierotenbullen.com";
     private String baseUrl = shortbaseUrl + "/shop";
@@ -155,7 +157,7 @@ public class RblScannerHtmlUnit {
     private HtmlPage login() throws IOException {
         String url = "http://tickets.dierotenbullen.com/shop?wes=empty_session_111&language=1&shopid=111&nextstate=8a&backloginstate=2";
 
-        UserData userData = userDataService.getUserData();
+        userData = userDataService.getUserData();
 
         final HtmlPage page1 = webClient.getPage(url);
 
@@ -216,18 +218,9 @@ public class RblScannerHtmlUnit {
         return loggedIn;
     }
 
+    public UserData getUserData() {
+        return userData;
+    }
 
-/*
-        final HtmlSubmitInput button = (HtmlSubmitInput) form.getInputsByValue("Anmelden").get(0);
-        if (button != null) {
-            System.out.println("HTML Submit-Button: " + button.getClass().getName());
-        }
 
-        final HtmlTextInput textField = form.getInputByName("email");
-        textField.setValueAttribute("jon@jon.com");
-        final HtmlTextInput textFieldpass = form.getInputByName("pass");
-        textFieldpass.setValueAttribute("ahhhh");
-        final HtmlPage page2 = button.click();
-        return page2.toString();
-*/
 }

@@ -974,6 +974,9 @@ var RblgameService = /** @class */ (function () {
     RblgameService.prototype.sendSearchOption = function (rblGameToSearch) {
         return this.http.post(this.apiBasePath + '/gametosearch', rblGameToSearch).toPromise();
     };
+    RblgameService.prototype.getLastUserData = function () {
+        return this.http.get(this.apiBasePath + '/username').toPromise();
+    };
     RblgameService = tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Injectable"])(),
         tslib__WEBPACK_IMPORTED_MODULE_0__["__param"](1, Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Inject"])(_constants__WEBPACK_IMPORTED_MODULE_3__["BASE_URL_RBL"])),
@@ -1040,13 +1043,14 @@ var TicketAlertComponent = /** @class */ (function () {
         this.service = service;
         this.title = 'Ticket Ale1rt';
         this.description = 'Ticketalert für alle aktiven Spiele';
-        this.version = '3.1';
+        this.version = '3.2';
         this.rblRuleResults = [];
         this.status = true;
         this.statusWebSocket = false;
         this.stompClient = null;
         this.audio = new Audio();
         this.playingMusic = false;
+        this.userName = '';
         this.waitroomcounter = {
             counter: -1
         };
@@ -1079,6 +1083,11 @@ var TicketAlertComponent = /** @class */ (function () {
             });
             _this.stompClient.subscribe('/topic/searchoptions', function (searchoptions) {
                 _this.showSearchoptionsResult(JSON.parse(searchoptions.body).content);
+                _this.service.getLastUserData().then(function (userName) {
+                    _this.userName = userName;
+                }).catch(function () {
+                    _this.userName = 'Fehler';
+                });
             });
             _this.stompClient.subscribe('/topic/waitroomcounter', function (waitroomcounter) {
                 _this.showWaitroomCounter(JSON.parse(waitroomcounter.body).content);

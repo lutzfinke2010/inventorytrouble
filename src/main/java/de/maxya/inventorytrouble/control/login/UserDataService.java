@@ -22,10 +22,14 @@ public class UserDataService {
                 new UserData()
                         .setName("kaibrunner456@gmail.com")
                         .setPasswort("kaibrunner123"));
+        this.userList.add(
+                new UserData()
+                        .setName("stefanmeyerpegau@gmail.com")
+                        .setPasswort("stefanmeyer123"));
     }
 
     public UserData getUserData() {
-        int index = r.nextInt(2);
+        int index = r.nextInt(this.userList.size());
         if (index >= 0 && index < userList.size()){
             return userList.get(index);
         }

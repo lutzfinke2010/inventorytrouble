@@ -39,4 +39,5 @@ public class RBLSearchOptionContainer {
     public void setDate(Date date) {
         this.date = date;
     }
+
 }
